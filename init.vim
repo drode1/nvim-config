@@ -4,18 +4,17 @@ set number
 set relativenumber
 set noswapfile
 set scrolloff=10
-syntax on
+
 set tabstop=4
 set softtabstop=4
 set shiftwidth=4
 set expandtab
 set autoindent
 set fileformat=unix
-filetype indent on
 
+filetype indent on
 set smartindent
 set tabstop=2
-set expandtab
 set shiftwidth=2
 
 autocmd FileType python set colorcolumn=79
@@ -33,8 +32,13 @@ Plug 'williamboman/mason.nvim'
 Plug 'williamboman/mason-lspconfig.nvim'
 Plug 'neovim/nvim-lspconfig'
 
+Plug 'hrsh7th/nvim-cmp'
+Plug 'hrsh7th/cmp-nvim-lsp'
+Plug 'saadparwaiz1/cmp_luasnip'
+Plug 'L3MON4D3/LuaSnip'
+
 " color scheme
-Plug 'mhartington/oceanic-next'  " colorscheme OceanicNext
+Plug 'mhartington/oceanic-next'   " colorscheme oceanic next
 
 " telescope finder and telescope grep
 Plug 'nvim-telescope/telescope.nvim', { 'tag': '0.1.0' } 
@@ -49,13 +53,18 @@ Plug 'williamboman/mason.nvim', { 'do': ':MasonUpdate' }
 call plug#end()
 
 
+" Theme
+syntax enable
 colorscheme OceanicNext
-
 
 " Netrw file explorer settings
 let g:netrw_banner = 0 " hide banner above files
 let g:netrw_liststyle = 3 " tree instead of plain view
 let g:netrw_browse_split = 3 " vertical split window when Enter pressed on file
+
+" Automatically format frontend files with prettier after file save
+let g:prettier#autoformat = 1
+let g:prettier#autoformat_require_pragma = 0
 
 " отключаем выделение
 nnoremap ,<space> :nohlsearch<CR> 
@@ -88,9 +97,10 @@ local augroup = vim.api.nvim_create_augroup("LspFormatting", {})
 local null_ls = require("null-ls")
 null_ls.setup({
     sources = {
-        null_ls.builtins.formatting.prettier,
-        null_ls.builtins.formatting.black
-    },
+        null_ls.builtins.formatting.prettier.with({
+          filetypes = { "html", "json", "yaml", "markdown", "css" },
+        }),
+   },
     on_attach = function(client, bufnr)
         if client.supports_method("textDocument/formatting") then
             vim.api.nvim_clear_autocmds({ group = augroup, buffer = bufnr })
@@ -98,8 +108,6 @@ null_ls.setup({
                 group = augroup,
                 buffer = bufnr,
                 callback = function()
-                    -- on 0.8, you should use vim.lsp.buf.format({ bufnr = bufnr }) instead
-                    -- on later neovim version, you should use vim.lsp.buf.format({ async = false }) instead
                     vim.lsp.buf.format({ async = false })
                 end,
             })
@@ -110,4 +118,57 @@ vim.lsp.buf.format({ timeout_ms = 2000 }) -- 2 seconds
 
 --Telescope fzf plugin
 require('telescope').load_extension('fzf')
+
+
+-- Set completeopt to have a better completion experience
+vim.o.completeopt = 'menuone,noselect'
+
+-- luasnip setup
+local luasnip = require 'luasnip'
+local async = require "plenary.async"
+
+-- nvim-cmp setup
+local cmp = require 'cmp'
+cmp.setup {
+  snippet = {
+    expand = function(args)
+      require('luasnip').lsp_expand(args.body)
+    end,
+  },
+  mapping = {
+    ['<C-p>'] = cmp.mapping.select_prev_item(),
+    ['<C-n>'] = cmp.mapping.select_next_item(),
+    ['<C-d>'] = cmp.mapping.scroll_docs(-4),
+    ['<C-f>'] = cmp.mapping.scroll_docs(4),
+    ['<C-Space>'] = cmp.mapping.complete(),
+    ['<C-e>'] = cmp.mapping.close(),
+    ['<CR>'] = cmp.mapping.confirm {
+      behavior = cmp.ConfirmBehavior.Replace,
+      select = true,
+    },
+    ['<Tab>'] = function(fallback)
+      if vim.fn.pumvisible() == 1 then
+        vim.fn.feedkeys(vim.api.nvim_replace_termcodes('<C-n>', true, true, true), 'n')
+      elseif luasnip.expand_or_jumpable() then
+        vim.fn.feedkeys(vim.api.nvim_replace_termcodes('<Plug>luasnip-expand-or-jump', true, true, true), '')
+      else
+        fallback()
+      end
+    end,
+    ['<S-Tab>'] = function(fallback)
+      if vim.fn.pumvisible() == 1 then
+        vim.fn.feedkeys(vim.api.nvim_replace_termcodes('<C-p>', true, true, true), 'n')
+      elseif luasnip.jumpable(-1) then
+        vim.fn.feedkeys(vim.api.nvim_replace_termcodes('<Plug>luasnip-jump-prev', true, true, true), '')
+      else
+        fallback()
+      end
+    end,
+  },
+  sources = {
+    { name = 'nvim_lsp' },
+    { name = 'luasnip' },
+  },
+}
+
 EOF
