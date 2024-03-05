@@ -76,7 +76,16 @@ nnoremap ,f <cmd>Telescope find_files<cr>
 noremap ,g <cmd>Telescope live_grep<cr> 
 
 lua << EOF
-require("mason").setup()
+require("mason").setup({
+install_root_dir = vim.fn.stdpath("config") .. "/plugged/mason",
+ui = {
+        icons = {
+            package_installed = "✅",
+            package_pending = "➡️",
+            package_uninstalled = "❌"
+        }
+    }
+})
 require("mason-lspconfig").setup()
 
 require("mason-lspconfig").setup_handlers {
