@@ -16,9 +16,10 @@ filetype indent on
 set smartindent
 set tabstop=2
 set shiftwidth=2
+set clipboard=unnamed
 
 autocmd FileType python set colorcolumn=79
-
+set ignorecase
 " отключаем клавиши стрелок
 nnoremap <Left> :echoe "Use h"<CR>
 nnoremap <Right> :echoe "Use l"<CR>
@@ -26,7 +27,7 @@ nnoremap <Up> :echoe "Use k"<CR>
 nnoremap <Down> :echoe "Use j"<CR>
 
 
-call plug#begin('~/.vim/plugged')
+call plug#begin('~/.config/nvim/plugged')
 
 Plug 'williamboman/mason.nvim'
 Plug 'williamboman/mason-lspconfig.nvim'
@@ -51,7 +52,6 @@ Plug 'jose-elias-alvarez/null-ls.nvim'
 " :MasonUpdate updates registry contents
 Plug 'williamboman/mason.nvim', { 'do': ':MasonUpdate' }
 call plug#end()
-
 
 " Theme
 syntax enable
