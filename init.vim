@@ -14,9 +14,7 @@ set fileformat=unix
 
 filetype indent on
 set smartindent
-set tabstop=2
-set shiftwidth=2
-set clipboard=unnamed
+set clipboard=unnamedplus
 
 autocmd FileType python set colorcolumn=79
 set ignorecase
@@ -42,7 +40,7 @@ Plug 'L3MON4D3/LuaSnip'
 Plug 'mhartington/oceanic-next'   " colorscheme oceanic next
 
 " telescope finder and telescope grep
-Plug 'nvim-telescope/telescope.nvim', { 'tag': '0.1.0' } 
+Plug 'nvim-telescope/telescope.nvim', { 'tag': '0.1.6' } 
 Plug 'nvim-telescope/telescope-fzf-native.nvim', { 'do': 'make' } 
 
 " lua plugin for telescope
